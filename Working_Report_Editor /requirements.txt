@@ -1,7 +1,4 @@
-streamlit
-pandas
-numpy
-plotly
+# Core dependencies
 pillow
 pytesseract
 
