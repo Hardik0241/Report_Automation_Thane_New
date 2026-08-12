@@ -1,1 +1,6 @@
+models:
+  - name: deepseek-coder
+    provider: ollama
+    model: deepseek-coder
 
+defaultModel: deepseek-coder
