@@ -55,8 +55,7 @@ SALES_EMAIL_MAP = {
 # Build Gmail Query with specific senders
 # ============================================================
 ALL_SALES_EMAILS = list(SALES_EMAIL_MAP.keys())
-ALL_HR_EMAILS = []  # No HR
-ALL_ALLOWED_EMAILS = ALL_SALES_EMAILS + ALL_HR_EMAILS
+ALL_ALLOWED_EMAILS = ALL_SALES_EMAILS
 
 FROM_QUERY = " OR ".join([f"from:{email}" for email in ALL_ALLOWED_EMAILS])
 GMAIL_QUERY = f"({FROM_QUERY}) is:unread"
@@ -99,11 +98,8 @@ SALES_COLUMN_MAPPING = {
     "Report Status": 10,
 }
 
-# No HR column mapping for branch repos
-HR_COLUMN_MAPPING = {}
 
 SALES_HEADERS = list(SALES_COLUMN_MAPPING.keys())
-HR_HEADERS = []  # No HR headers
 
 # ============================================================
 # GMAIL CONFIGURATION
@@ -129,8 +125,7 @@ VALIDATION_RULES = {
 }
 
 DEPARTMENT_KEYWORDS = {
-    "Sales": ["sales", "callyzer", "dialer", "prospect", "dialed", "dial", "outgoing"],
-    "HR": [],  # No HR keywords
+    "Sales": ["sales", "callyzer", "dialer", "prospect", "dialed", "dial", "outgoing"]
 }
 
 DATE_PATTERNS = [
