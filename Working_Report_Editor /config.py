@@ -11,7 +11,6 @@ import json
 # ============================================================
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY_B2", "")
 SALES_SPREADSHEET_ID = os.environ.get("SALES_SPREADSHEET_ID_B2", "")
-# HR_SPREADSHEET_ID not needed for branch repos
 GOOGLE_CREDENTIALS_DICT = {}
 
 creds_json = os.environ.get("GOOGLE_CREDENTIALS", "")
