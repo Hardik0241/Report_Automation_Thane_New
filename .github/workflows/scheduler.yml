@@ -1,1 +1,94 @@
+name: Report Automation Scheduler Thane_New
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  schedule:
+    # UPDATED: Active window 3:00 PM to 09:00 PM IST
+    # UTC is 5 hours 30 minutes behind IST
+    # IST 3:00 PM = UTC 09:30
+    # IST 8:30 PM = UTC 15:00
+    # IST 9:00 PM = UTC 15:30 (FINAL RUN AT DEADLINE)
+    - cron: '30 9-14 * * *'   # Every 30 min from 09:30 UTC to 14:30 UTC (3:00 PM to 8:30 PM IST)
+    - cron: '30 15 * * *'     # FINAL RUN at 15:30 UTC (9:00 PM IST - DEADLINE)
+  workflow_dispatch:
+
+jobs:
+  run-processor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr
+
+      - name: Install dependencies
+        working-directory: Working_Report_Editor
+        run: |
+          pip install -r requirements.txt
+
+      - name: Create logs directory
+        run: |
+          mkdir -p Working_Report_Editor/logs
+          mkdir -p Working_Report_Editor/attachments
+
+      - name: Run processor
+        working-directory: Working_Report_Editor
+        run: python main.py
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SALES_SPREADSHEET_ID: ${{ secrets.SALES_SPREADSHEET_ID }}
+          # HR_SPREADSHEET_ID not needed for branch repos
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+
+      - name: Debug - Check if logs file exists
+        run: |
+          echo "=== Checking logs directory ==="
+          ls -la Working_Report_Editor/logs/ || echo "Logs directory not found"
+          echo ""
+          echo "=== Checking processing_logs.csv ==="
+          if [ -f Working_Report_Editor/logs/processing_logs.csv ]; then
+            echo "File exists! Contents:"
+            cat Working_Report_Editor/logs/processing_logs.csv
+          else
+            echo "File does not exist yet"
+          fi
+
+      - name: Commit and push logs to repository
+        run: |
+          cd Working_Report_Editor
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Create logs directory and ensure file exists
+          mkdir -p logs
+          touch logs/processing_logs.csv
+          
+          # Force add the file
+          git add -f logs/processing_logs.csv
+          
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update processing logs [skip ci]"
+            git push
+            echo "Logs committed to repository"
+          fi
 
