@@ -19,19 +19,18 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
+          fetch-depth: 0
 
-      - name: 🔍 DEBUG - Show everything
+      - name: Debug - Show branch and files
         run: |
-          echo "=== Current directory ==="
-          pwd
           echo "=== Current branch ==="
           git branch
           echo "=== Last commit ==="
           git log -1
-          echo "=== Full file tree (root) ==="
+          echo "=== Contents of root ==="
           ls -la
-          echo "=== Recursive list of ALL files ==="
-          find . -type f | sort
+          echo "=== Contents of Working_Report_Editor ==="
+          ls -la Working_Report_Editor/ || echo "Folder not found!"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -54,8 +53,8 @@ jobs:
             pip install -r requirements.txt
           else
             echo "❌ requirements.txt not found!"
-            echo "=== Contents of current directory ==="
-            ls -la
+            echo "=== Full tree ==="
+            find . -type f | sort
             exit 1
           fi
 
@@ -75,8 +74,8 @@ jobs:
             python main.py
           else
             echo "❌ main.py not found!"
-            echo "=== Contents of current directory ==="
-            ls -la
+            echo "=== Full tree ==="
+            find . -type f | sort
             exit 1
           fi
         env:
