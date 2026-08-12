@@ -18,15 +18,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: main   # Explicitly checkout main branch
+          ref: main
 
-      - name: Debug - Full file tree
+      - name: 🔍 DEBUG - Show everything
         run: |
           echo "=== Current directory ==="
           pwd
-          echo "=== All files in root ==="
+          echo "=== Current branch ==="
+          git branch
+          echo "=== Last commit ==="
+          git log -1
+          echo "=== Full file tree (root) ==="
           ls -la
-          echo "=== Recursive file list ==="
+          echo "=== Recursive list of ALL files ==="
           find . -type f | sort
 
       - name: Set up Python
@@ -50,6 +54,8 @@ jobs:
             pip install -r requirements.txt
           else
             echo "❌ requirements.txt not found!"
+            echo "=== Contents of current directory ==="
+            ls -la
             exit 1
           fi
 
@@ -61,14 +67,16 @@ jobs:
       - name: Run processor
         run: |
           if [ -f "Working_Report_Editor/main.py" ]; then
-            echo "✅ Running main.py from Working_Report_Editor"
+            echo "✅ Running from Working_Report_Editor"
             cd Working_Report_Editor
             python main.py
           elif [ -f "main.py" ]; then
-            echo "✅ Running main.py from root"
+            echo "✅ Running from root"
             python main.py
           else
             echo "❌ main.py not found!"
+            echo "=== Contents of current directory ==="
+            ls -la
             exit 1
           fi
         env:
