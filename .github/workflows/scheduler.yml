@@ -17,22 +17,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: main   # Explicitly checkout main branch
 
-      - name: Debug - Show files after checkout
+      - name: Debug - Full file tree
         run: |
           echo "=== Current directory ==="
           pwd
           echo "=== All files in root ==="
           ls -la
-          echo "=== Check if Working_Report_Editor exists ==="
-          if [ -d "Working_Report_Editor" ]; then
-            echo "✅ Working_Report_Editor exists!"
-            ls -la Working_Report_Editor/
-          else
-            echo "❌ Working_Report_Editor does NOT exist!"
-            echo "=== Creating Working_Report_Editor as fallback ==="
-            mkdir -p Working_Report_Editor
-          fi
+          echo "=== Recursive file list ==="
+          find . -type f | sort
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -46,9 +41,17 @@ jobs:
           sudo apt-get install -y tesseract-ocr
 
       - name: Install dependencies
-        working-directory: Working_Report_Editor
         run: |
-          pip install -r requirements.txt
+          if [ -f "Working_Report_Editor/requirements.txt" ]; then
+            echo "✅ Installing from Working_Report_Editor"
+            pip install -r Working_Report_Editor/requirements.txt
+          elif [ -f "requirements.txt" ]; then
+            echo "✅ Installing from root"
+            pip install -r requirements.txt
+          else
+            echo "❌ requirements.txt not found!"
+            exit 1
+          fi
 
       - name: Create logs directory
         run: |
@@ -56,8 +59,18 @@ jobs:
           mkdir -p Working_Report_Editor/attachments
 
       - name: Run processor
-        working-directory: Working_Report_Editor
-        run: python main.py
+        run: |
+          if [ -f "Working_Report_Editor/main.py" ]; then
+            echo "✅ Running main.py from Working_Report_Editor"
+            cd Working_Report_Editor
+            python main.py
+          elif [ -f "main.py" ]; then
+            echo "✅ Running main.py from root"
+            python main.py
+          else
+            echo "❌ main.py not found!"
+            exit 1
+          fi
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY_THANENEW }}
@@ -65,11 +78,6 @@ jobs:
           CLIENT_ID: ${{ secrets.THANENEW_CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.THANENEW_CLIENT_SECRET }}
           REFRESH_TOKEN: ${{ secrets.THANENEW_REFRESH_TOKEN }}
-
-      - name: Debug - Check logs
-        run: |
-          echo "=== Checking logs directory ==="
-          ls -la Working_Report_Editor/logs/ || echo "Logs directory not found"
 
       - name: Commit and push logs
         run: |
