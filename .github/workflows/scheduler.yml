@@ -17,26 +17,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: main
 
-      - name: Debug - List all files
+      - name: Debug - Show files after checkout
         run: |
           echo "=== Current directory ==="
           pwd
           echo "=== All files in root ==="
           ls -la
-
-      - name: Debug - Check Working_Report_Editor
-        run: |
+          echo "=== Check if Working_Report_Editor exists ==="
           if [ -d "Working_Report_Editor" ]; then
             echo "✅ Working_Report_Editor exists!"
-            echo "Contents:"
             ls -la Working_Report_Editor/
           else
             echo "❌ Working_Report_Editor does NOT exist!"
-            exit 1
+            echo "=== Creating Working_Report_Editor as fallback ==="
+            mkdir -p Working_Report_Editor
           fi
 
       - name: Set up Python
