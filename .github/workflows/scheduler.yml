@@ -21,16 +21,13 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Debug - Show branch and files
+      - name: Debug - Confirm folder name
         run: |
-          echo "=== Current branch ==="
-          git branch
-          echo "=== Last commit ==="
-          git log -1
-          echo "=== Contents of root ==="
+          echo "=== Exact folder names ==="
           ls -la
-          echo "=== Contents of Working_Report_Editor ==="
-          ls -la Working_Report_Editor/ || echo "Folder not found!"
+          echo "=== Entering folder with space ==="
+          cd "Working_Report_Editor " || echo "Cannot cd into folder"
+          ls -la
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -45,37 +42,30 @@ jobs:
 
       - name: Install dependencies
         run: |
-          if [ -f "Working_Report_Editor/requirements.txt" ]; then
-            echo "✅ Installing from Working_Report_Editor"
-            pip install -r Working_Report_Editor/requirements.txt
-          elif [ -f "requirements.txt" ]; then
-            echo "✅ Installing from root"
+          cd "Working_Report_Editor "
+          if [ -f "requirements.txt" ]; then
+            echo "✅ requirements.txt found!"
             pip install -r requirements.txt
           else
             echo "❌ requirements.txt not found!"
-            echo "=== Full tree ==="
-            find . -type f | sort
+            ls -la
             exit 1
           fi
 
       - name: Create logs directory
         run: |
-          mkdir -p Working_Report_Editor/logs
-          mkdir -p Working_Report_Editor/attachments
+          mkdir -p "Working_Report_Editor /logs"
+          mkdir -p "Working_Report_Editor /attachments"
 
       - name: Run processor
         run: |
-          if [ -f "Working_Report_Editor/main.py" ]; then
-            echo "✅ Running from Working_Report_Editor"
-            cd Working_Report_Editor
-            python main.py
-          elif [ -f "main.py" ]; then
-            echo "✅ Running from root"
+          cd "Working_Report_Editor "
+          if [ -f "main.py" ]; then
+            echo "✅ main.py found!"
             python main.py
           else
             echo "❌ main.py not found!"
-            echo "=== Full tree ==="
-            find . -type f | sort
+            ls -la
             exit 1
           fi
         env:
@@ -88,7 +78,7 @@ jobs:
 
       - name: Commit and push logs
         run: |
-          cd Working_Report_Editor
+          cd "Working_Report_Editor "
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           mkdir -p logs
