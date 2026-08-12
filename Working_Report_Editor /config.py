@@ -23,35 +23,33 @@ if creds_json:
 # ============================================================
 # ⚠️ UPDATE THIS LIST WITH BRANCH-SPECIFIC EMPLOYEES
 SALES_EMPLOYEES = [
-    # Add branch employees here
-    # Example: "Employee1", "Employee2", "Employee3",
+    "Adit", "Antima", "Aryan", "Chetan", "Chris", "Chris", 
+    "Karan", "Khushi", "Kitiksha", "Mamta", "Rakshan", 
+    "Sameer", "Tushar", "Yukta", "Vaishnavi", "Zoya",
 ]
-
-HR_EMPLOYEES = []  # No HR for branch repos
 
 # ============================================================
 # EMAIL TO NAME MAPPING - SALES ONLY
 # ============================================================
 # ⚠️ UPDATE THIS MAP WITH BRANCH-SPECIFIC EMAILS
 SALES_EMAIL_MAP = {
-    "adit.edujam@gmail.com": "Adit Rai",
-    "antima.edujam@gmail.com": "Antima Tiwari",
-    "aryany.edujam@gmail.com": "Aryan Yadav",
-    "chetang.edujam@gmail.com": "Chetan Gade",
-    "chrisa.edujam@gmail.com": "Chris Agnelo",
-    "karanp.edujam@gmail.com": "Karan Prajapati",
-    "khushib.edujam@gmail.com": "Khushi Bhairi",
-    "kitiksha.edujam@gmail.com": "Kitiksha Kamble",
-    "mamta.edujam@gmail.com": "Mamta Yadav",
-    "rakshan.edujam@gmail.com": "Rakshan Gadekar",
-    "sameers.edujam@gmail.com": "Sameer Surate",
-    "tushark.edujam@gmail.com": "Tushar Khatri",
-    "yuktam.edujam@gmail.com": "Yukta Mundhada",
-    "vaishnavip.edujam@gmail.com": "Vaishnavi Pawar",
-    "zoya.edujam@gmail.com": "Zoya Khan",
+    "adit.edujam@gmail.com": "Adit",
+    "antima.edujam@gmail.com": "Antima",
+    "aryany.edujam@gmail.com": "Aryan",
+    "chetang.edujam@gmail.com": "Chetan",
+    "chrisa.edujam@gmail.com": "Chris",
+    "karanp.edujam@gmail.com": "Karan",
+    "khushib.edujam@gmail.com": "Khushi",
+    "kitiksha.edujam@gmail.com": "Kitiksha",
+    "mamta.edujam@gmail.com": "Mamta",
+    "rakshan.edujam@gmail.com": "Rakshan",
+    "sameers.edujam@gmail.com": "Sameer",
+    "tushark.edujam@gmail.com": "Tushar",
+    "yuktam.edujam@gmail.com": "Yukta",
+    "vaishnavip.edujam@gmail.com": "Vaishnavi",
+    "zoya.edujam@gmail.com": "Zoya",
 }
 
-HR_EMAIL_MAP = {}  # No HR for branch repos
 
 # ============================================================
 # Build Gmail Query with specific senders
