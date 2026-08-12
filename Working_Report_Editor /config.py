@@ -121,7 +121,7 @@ VALIDATION_RULES = {
         "tolerance_pct": 5,
         "name_fuzzy_threshold": 0.80,
     },
-    # No HR validation rules
+
 }
 
 DEPARTMENT_KEYWORDS = {
