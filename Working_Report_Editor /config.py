@@ -1,6 +1,6 @@
 """
-config.py — Complete configuration for Report Automation System
-BRANCH REPO VERSION - Sales Only
+config.py — Configuration for Report Automation System
+BRANCH: THANE NEW - Sales Only
 """
 
 import os
@@ -9,8 +9,9 @@ import json
 # ============================================================
 # LOAD SECRETS (Environment Variables / GitHub Secrets)
 # ============================================================
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY_B2", "")
-SALES_SPREADSHEET_ID = os.environ.get("SALES_SPREADSHEET_ID_B2", "")
+# UPDATED: Using Thane New specific secret names
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY_THANENEW", "")
+SALES_SPREADSHEET_ID = os.environ.get("THANENEW_SALES_SPREADSHEET_ID", "")
 GOOGLE_CREDENTIALS_DICT = {}
 
 creds_json = os.environ.get("GOOGLE_CREDENTIALS", "")
@@ -20,17 +21,15 @@ if creds_json:
 # ============================================================
 # EMPLOYEE LISTS - SALES ONLY
 # ============================================================
-# ⚠️ UPDATE THIS LIST WITH BRANCH-SPECIFIC EMPLOYEES
 SALES_EMPLOYEES = [
-    "Adit", "Antima", "Aryan", "Chetan", "Chris", "Chris", 
-    "Karan", "Khushi", "Kitiksha", "Mamta", "Rakshan", 
+    "Adit", "Antima", "Aryan", "Chetan", "Chris",
+    "Karan", "Khushi", "Kitiksha", "Mamta", "Rakshan",
     "Sameer", "Tushar", "Yukta", "Vaishnavi", "Zoya",
 ]
 
 # ============================================================
 # EMAIL TO NAME MAPPING - SALES ONLY
 # ============================================================
-# ⚠️ UPDATE THIS MAP WITH BRANCH-SPECIFIC EMAILS
 SALES_EMAIL_MAP = {
     "adit.edujam@gmail.com": "Adit",
     "antima.edujam@gmail.com": "Antima",
@@ -49,7 +48,6 @@ SALES_EMAIL_MAP = {
     "zoya.edujam@gmail.com": "Zoya",
 }
 
-
 # ============================================================
 # Build Gmail Query with specific senders
 # ============================================================
@@ -60,22 +58,22 @@ FROM_QUERY = " OR ".join([f"from:{email}" for email in ALL_ALLOWED_EMAILS])
 GMAIL_QUERY = f"({FROM_QUERY}) is:unread"
 
 # ============================================================
-# MAX EMAILS PER RUN - Process ALL emails
+# MAX EMAILS PER RUN
 # ============================================================
 MAX_EMAILS_PER_RUN = 30
 
 # ============================================================
 # SALES DEADLINE RULE - 09:00 PM IST
 # ============================================================
-SALES_DEADLINE_HOUR = 21    # 09:00 PM
+SALES_DEADLINE_HOUR = 21
 SALES_DEADLINE_MINUTE = 0
 
 # ============================================================
 # SCHEDULER ACTIVE WINDOW - 3:00 PM to 09:00 PM IST
 # ============================================================
-ACTIVE_START_HOUR = 15      # 3:00 PM
+ACTIVE_START_HOUR = 15
 ACTIVE_START_MINUTE = 0
-ACTIVE_END_HOUR = 21        # 09:00 PM
+ACTIVE_END_HOUR = 21
 ACTIVE_END_MINUTE = 0
 
 # ============================================================
@@ -96,7 +94,6 @@ SALES_COLUMN_MAPPING = {
     "Document Collected": 9,
     "Report Status": 10,
 }
-
 
 SALES_HEADERS = list(SALES_COLUMN_MAPPING.keys())
 
@@ -120,7 +117,6 @@ VALIDATION_RULES = {
         "tolerance_pct": 5,
         "name_fuzzy_threshold": 0.80,
     },
-
 }
 
 DEPARTMENT_KEYWORDS = {
@@ -153,4 +149,3 @@ DUPLICATE_WINDOW_HOURS = 24
 # SERVICE ACCOUNT FILE
 # ============================================================
 SERVICE_ACCOUNT_FILE = "credentials.json"
-
