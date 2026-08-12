@@ -34,8 +34,21 @@ HR_EMPLOYEES = []  # No HR for branch repos
 # ============================================================
 # ⚠️ UPDATE THIS MAP WITH BRANCH-SPECIFIC EMAILS
 SALES_EMAIL_MAP = {
-    # Add branch emails here
-    # Example: "employee1.branch@gmail.com": "Employee1",
+    "adit.edujam@gmail.com": "Adit Rai",
+    "antima.edujam@gmail.com": "Antima Tiwari",
+    "aryany.edujam@gmail.com": "Aryan Yadav",
+    "chetang.edujam@gmail.com": "Chetan Gade",
+    "chrisa.edujam@gmail.com": "Chris Agnelo",
+    "karanp.edujam@gmail.com": "Karan Prajapati",
+    "khushib.edujam@gmail.com": "Khushi Bhairi",
+    "kitiksha.edujam@gmail.com": "Kitiksha Kamble",
+    "mamta.edujam@gmail.com": "Mamta Yadav",
+    "rakshan.edujam@gmail.com": "Rakshan Gadekar",
+    "sameers.edujam@gmail.com": "Sameer Surate",
+    "tushark.edujam@gmail.com": "Tushar Khatri",
+    "yuktam.edujam@gmail.com": "Yukta Mundhada",
+    "vaishnavip.edujam@gmail.com": "Vaishnavi Pawar",
+    "zoya.edujam@gmail.com": "Zoya Khan",
 }
 
 HR_EMAIL_MAP = {}  # No HR for branch repos
