@@ -47,24 +47,6 @@ jobs:
             echo "❌ SALES_SPREADSHEET_ID is EMPTY!"
           fi
 
-      - name: Debug - Check Service Account Email
-        run: |
-          echo "=== Service Account Email from GOOGLE_CREDENTIALS ==="
-          python3 -c "
-import json
-import os
-creds_json = os.environ.get('GOOGLE_CREDENTIALS', '')
-if creds_json:
-    try:
-        creds = json.loads(creds_json)
-        print(f'client_email: {creds.get(\"client_email\", \"NOT FOUND\")}')
-        print(f'project_id: {creds.get(\"project_id\", \"NOT FOUND\")}')
-    except Exception as e:
-        print(f'Error parsing JSON: {e}')
-else:
-    print('GOOGLE_CREDENTIALS is empty!')
-"
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -87,63 +69,6 @@ else:
             ls -la
             exit 1
           fi
-
-      - name: Create test script
-        run: |
-          cd "Working_Report_Editor "
-          cat > test_sheets.py << 'EOF'
-import os
-import json
-import gspread
-from google.oauth2 import service_account
-
-print("=== TESTING GOOGLE SHEETS CONNECTION ===")
-
-creds_json = os.environ.get("GOOGLE_CREDENTIALS", "")
-if not creds_json:
-    print("❌ GOOGLE_CREDENTIALS is empty!")
-    exit(1)
-
-try:
-    creds_dict = json.loads(creds_json)
-    print(f"✅ client_email: {creds_dict.get('client_email', 'NOT FOUND')}")
-    print(f"✅ project_id: {creds_dict.get('project_id', 'NOT FOUND')}")
-except Exception as e:
-    print(f"❌ Failed to parse JSON: {e}")
-    exit(1)
-
-try:
-    print("\n🔄 Attempting to connect to Google Sheets...")
-    scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-    creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=scopes)
-    client = gspread.authorize(creds)
-    print("✅ Client created successfully!")
-
-    sheet_id = os.environ.get("SALES_SPREADSHEET_ID", "")
-    if not sheet_id:
-        print("❌ SALES_SPREADSHEET_ID is empty!")
-        exit(1)
-
-    print(f"🔄 Attempting to open sheet: {sheet_id}")
-    sheet = client.open_by_key(sheet_id)
-    print(f"✅ Success! Sheet title: {sheet.title}")
-
-    worksheets = sheet.worksheets()
-    print(f"✅ Found {len(worksheets)} worksheets:")
-    for ws in worksheets:
-        print(f"   - {ws.title}")
-
-except Exception as e:
-    print(f"❌ ERROR: {type(e).__name__}: {e}")
-    exit(1)
-
-print("\n=== TEST COMPLETE ===")
-EOF
-
-      - name: Test Google Sheets Connection
-        run: |
-          cd "Working_Report_Editor "
-          python test_sheets.py
 
       - name: Create logs directory
         run: |
