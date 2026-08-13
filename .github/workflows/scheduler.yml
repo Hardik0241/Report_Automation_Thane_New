@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
-    # Environment variables at job level
     env:
       GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY_THANENEW }}
@@ -89,25 +88,10 @@ else:
             exit 1
           fi
 
-      - name: Create logs directory
-        run: |
-          mkdir -p "Working_Report_Editor /logs"
-          mkdir -p "Working_Report_Editor /attachments"
-
-      - name: Test Google Sheets Connection
+      - name: Create test script
         run: |
           cd "Working_Report_Editor "
-          if [ -f "test_sheets.py" ]; then
-            echo "✅ test_sheets.py found!"
-            python test_sheets.py
-          else
-            echo "❌ test_sheets.py not found!"
-            echo "Creating test_sheets.py..."
-            cat > test_sheets.py << 'EOF'
-"""
-test_sheets.py — Simple test to verify Google Sheets connection
-"""
-
+          cat > test_sheets.py << 'EOF'
 import os
 import json
 import gspread
@@ -115,11 +99,6 @@ from google.oauth2 import service_account
 
 print("=== TESTING GOOGLE SHEETS CONNECTION ===")
 
-# Check environment variables
-print(f"GOOGLE_CREDENTIALS exists: {bool(os.environ.get('GOOGLE_CREDENTIALS', ''))}")
-print(f"SALES_SPREADSHEET_ID: {os.environ.get('SALES_SPREADSHEET_ID', 'NOT SET')}")
-
-# Load credentials
 creds_json = os.environ.get("GOOGLE_CREDENTIALS", "")
 if not creds_json:
     print("❌ GOOGLE_CREDENTIALS is empty!")
@@ -133,7 +112,6 @@ except Exception as e:
     print(f"❌ Failed to parse JSON: {e}")
     exit(1)
 
-# Try to connect
 try:
     print("\n🔄 Attempting to connect to Google Sheets...")
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
@@ -150,7 +128,6 @@ try:
     sheet = client.open_by_key(sheet_id)
     print(f"✅ Success! Sheet title: {sheet.title}")
 
-    # List all worksheets
     worksheets = sheet.worksheets()
     print(f"✅ Found {len(worksheets)} worksheets:")
     for ws in worksheets:
@@ -162,11 +139,16 @@ except Exception as e:
 
 print("\n=== TEST COMPLETE ===")
 EOF
-            python test_sheets.py
-          fi
-        env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-          SALES_SPREADSHEET_ID: 1bAxmZHCByQMPKGZ4Qi2bYzk2NuC3_cLPfgGP5S76VVE
+
+      - name: Test Google Sheets Connection
+        run: |
+          cd "Working_Report_Editor "
+          python test_sheets.py
+
+      - name: Create logs directory
+        run: |
+          mkdir -p "Working_Report_Editor /logs"
+          mkdir -p "Working_Report_Editor /attachments"
 
       - name: Run processor
         run: |
