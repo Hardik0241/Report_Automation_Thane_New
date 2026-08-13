@@ -10,7 +10,7 @@ import json
 # LOAD SECRETS (Environment Variables / GitHub Secrets)
 # ============================================================
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY_THANENEW", "")
-SALES_SPREADSHEET_ID = os.environ.get("THANENEW_SALES_SPREADSHEET_ID", "")
+SALES_SPREADSHEET_ID = os.environ.get("SALES_SPREADSHEET_ID", "")
 GOOGLE_CREDENTIALS_DICT = {}
 
 creds_json = os.environ.get("GOOGLE_CREDENTIALS", "")
