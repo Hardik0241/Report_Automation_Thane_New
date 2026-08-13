@@ -3,7 +3,6 @@ gmail_reader.py — Fetch unread emails from Gmail
 READ ONLY MODE - Emails stay UNREAD
 BRANCH: THANE NEW - Sales Only
 UPDATED: Using THANENEW_ prefixed secrets for OAuth
-UPDATED: Removed Streamlit reference (not needed for branch repos)
 """
 
 import base64
