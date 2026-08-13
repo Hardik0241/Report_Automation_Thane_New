@@ -3,6 +3,7 @@ gmail_reader.py — Fetch unread emails from Gmail
 READ ONLY MODE - Emails stay UNREAD
 BRANCH: THANE NEW - Sales Only
 UPDATED: Using THANENEW_ prefixed secrets for OAuth
+UPDATED: Added debug prints to troubleshoot OAuth issues
 """
 
 import base64
@@ -39,10 +40,20 @@ class GmailReader:
 
         import os
 
+        # DEBUG: Print which environment variables exist
+        print("=== DEBUG: Checking OAuth Environment Variables ===")
+        print(f"THANENEW_CLIENT_ID exists: {bool(os.environ.get('THANENEW_CLIENT_ID', ''))}")
+        print(f"THANENEW_CLIENT_SECRET exists: {bool(os.environ.get('THANENEW_CLIENT_SECRET', ''))}")
+        print(f"THANENEW_REFRESH_TOKEN exists: {bool(os.environ.get('THANENEW_REFRESH_TOKEN', ''))}")
+
         # UPDATED: Using THANENEW_ prefixed secrets
         refresh_token = os.environ.get("THANENEW_REFRESH_TOKEN", "")
         client_id = os.environ.get("THANENEW_CLIENT_ID", "")
         client_secret = os.environ.get("THANENEW_CLIENT_SECRET", "")
+
+        print(f"CLIENT_ID length: {len(client_id)}")
+        print(f"CLIENT_SECRET length: {len(client_secret)}")
+        print(f"REFRESH_TOKEN length: {len(refresh_token)}")
 
         if refresh_token and client_id and client_secret:
             self._oauth_creds = Credentials(
@@ -56,6 +67,7 @@ class GmailReader:
             logger.info("OAuth credentials loaded from environment (THANENEW)")
             return self._oauth_creds
 
+        print("❌ Missing OAuth credentials!")
         raise Exception("No OAuth credentials found for THANENEW branch")
 
     def _get_service(self):
