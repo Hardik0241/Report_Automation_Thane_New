@@ -13,11 +13,11 @@ jobs:
   run-processor:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     env:
       GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY_THANENEW }}
-      SALES_SPREADSHEET_ID: 1bAxmZHCByQMPKGZ4Qi2bYzk2NuC3_cLPfgGP5S76VVE
+      SALES_SPREADSHEET_ID: ${{ secrets.THANENEW_SALES_SPREADSHEET_ID }}
       CLIENT_ID: ${{ secrets.THANENEW_CLIENT_ID }}
       CLIENT_SECRET: ${{ secrets.THANENEW_CLIENT_SECRET }}
       REFRESH_TOKEN: ${{ secrets.THANENEW_REFRESH_TOKEN }}
@@ -45,6 +45,25 @@ jobs:
             echo "Length: ${#SALES_SPREADSHEET_ID}"
           else
             echo "❌ SALES_SPREADSHEET_ID is EMPTY!"
+          fi
+
+      - name: Debug - Check OAuth Secrets
+        run: |
+          echo "=== Checking OAuth Secrets ==="
+          if [ -n "$CLIENT_ID" ]; then
+            echo "✅ CLIENT_ID is set"
+          else
+            echo "❌ CLIENT_ID is EMPTY"
+          fi
+          if [ -n "$CLIENT_SECRET" ]; then
+            echo "✅ CLIENT_SECRET is set"
+          else
+            echo "❌ CLIENT_SECRET is EMPTY"
+          fi
+          if [ -n "$REFRESH_TOKEN" ]; then
+            echo "✅ REFRESH_TOKEN is set"
+          else
+            echo "❌ REFRESH_TOKEN is EMPTY"
           fi
 
       - name: Set up Python
