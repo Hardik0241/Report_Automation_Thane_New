@@ -1,7 +1,14 @@
 """
 sheets_service.py — Google Sheets operations with Calibri font, size 13, center alignment
 BRANCH: THANE NEW - Sales Only
-DEBUG VERSION - Added extensive debug logging to pinpoint connection failures
+Handles: Not Sent, actual data
+Formatting: Dark black text (#000000), All borders on data cells
+UPDATED: Fixed write_batch() to properly clear "Not Sent" status when data is written
+UPDATED: Supports writing "Not Sent" status for late Sales submissions
+UPDATED: Added retry logic with exponential backoff for connection failures (503 errors)
+UPDATED: Added timeout to prevent hanging
+UPDATED: Removed HR references (Sales only branch)
+UPDATED: Removed pre-population of employee names without dates in new sheets
 """
 
 import logging
@@ -30,141 +37,85 @@ _SCOPES = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleap
 
 
 def _get_credentials():
-    """Get credentials from environment variable with debug logging."""
-    logger.info("🔍 DEBUG: _get_credentials() called")
-    
-    # Check if GOOGLE_CREDENTIALS environment variable exists
     creds_json = os.environ.get("GOOGLE_CREDENTIALS", "")
-    logger.info(f"🔍 DEBUG: GOOGLE_CREDENTIALS env var exists: {bool(creds_json)}")
-    logger.info(f"🔍 DEBUG: GOOGLE_CREDENTIALS length: {len(creds_json)} characters")
-    
     if creds_json:
-        try:
-            logger.info("🔍 DEBUG: Attempting to parse GOOGLE_CREDENTIALS JSON...")
-            creds_dict = json.loads(creds_json)
-            logger.info(f"🔍 DEBUG: JSON parsed successfully!")
-            logger.info(f"🔍 DEBUG: client_email = {creds_dict.get('client_email', 'NOT FOUND')}")
-            logger.info(f"🔍 DEBUG: project_id = {creds_dict.get('project_id', 'NOT FOUND')}")
-            logger.info(f"🔍 DEBUG: private_key length = {len(creds_dict.get('private_key', ''))} characters")
-            
-            logger.info("✅ Loading Service Account credentials from GOOGLE_CREDENTIALS env var")
-            return service_account.Credentials.from_service_account_info(
-                creds_dict, scopes=_SCOPES
-            )
-        except json.JSONDecodeError as e:
-            logger.error(f"❌ DEBUG: Failed to parse GOOGLE_CREDENTIALS JSON: {e}")
-            logger.error(f"❌ DEBUG: First 100 characters of JSON: {creds_json[:100]}...")
-            raise Exception(f"Invalid GOOGLE_CREDENTIALS JSON: {e}")
-        except Exception as e:
-            logger.error(f"❌ DEBUG: Failed to create credentials: {e}")
-            raise
+        logger.info("Loading from GOOGLE_CREDENTIALS env var")
+        return service_account.Credentials.from_service_account_info(json.loads(creds_json), scopes=_SCOPES)
 
-    # Check if credentials.json file exists (fallback)
     if os.path.exists("credentials.json"):
-        logger.info("✅ Loading from credentials.json file")
+        logger.info("Loading from credentials.json file")
         return service_account.Credentials.from_service_account_file("credentials.json", scopes=_SCOPES)
 
-    logger.error("❌ DEBUG: No valid credentials found!")
-    logger.error("❌ DEBUG: Check that GOOGLE_CREDENTIALS secret is set correctly")
     raise Exception("No valid credentials found")
 
 
 def _get_gspread_client() -> gspread.Client:
-    """Get gspread client with timeout."""
-    logger.info("🔍 DEBUG: _get_gspread_client() called")
-    try:
-        creds = _get_credentials()
-        logger.info("🔍 DEBUG: Credentials obtained, authorizing gspread...")
-        client = gspread.authorize(creds)
-        logger.info("🔍 DEBUG: Setting client timeout to 30 seconds...")
-        client.timeout = 30
-        logger.info("✅ Gspread client created successfully")
-        return client
-    except Exception as e:
-        logger.error(f"❌ DEBUG: Failed to create gspread client: {e}")
-        raise
+    client = gspread.authorize(_get_credentials())
+    # Set timeout to prevent hanging on slow connections
+    client.timeout = 30
+    return client
 
 
 def _connect_with_retry(max_retries: int = 5, initial_delay: int = 2) -> Tuple[gspread.Client, object]:
     """
-    Attempt to connect to Google Sheets with retry logic and extensive debug logging.
-    """
-    logger.info("🔍 DEBUG: _connect_with_retry() called")
-    logger.info(f"🔍 DEBUG: max_retries={max_retries}, initial_delay={initial_delay}")
+    Attempt to connect to Google Sheets with retry logic for 503 errors.
     
+    Args:
+        max_retries: Maximum number of retry attempts
+        initial_delay: Initial delay in seconds (doubles each retry)
+    
+    Returns:
+        Tuple of (client, sales_ss)
+    """
     last_error = None
     
     for attempt in range(max_retries):
         try:
             logger.info(f"🔄 Connecting to Google Sheets (attempt {attempt + 1}/{max_retries})...")
             
-            logger.info("🔍 DEBUG: Calling _get_gspread_client()...")
             client = _get_gspread_client()
-            logger.info("✅ DEBUG: Client obtained successfully")
-
-            # Try to open the Sales spreadsheet
-            logger.info(f"🔍 DEBUG: Attempting to open spreadsheet with ID: {SALES_SPREADSHEET_ID}")
-            logger.info(f"🔍 DEBUG: SALES_SPREADSHEET_ID length: {len(SALES_SPREADSHEET_ID)} characters")
             
+            # Try to open the Sales spreadsheet
             sales_ss = client.open_by_key(SALES_SPREADSHEET_ID)
             
             # Verify connection by fetching spreadsheet title
             sales_title = sales_ss.title
+            
             logger.info(f"✅ Successfully connected to Sales spreadsheet: '{sales_title}'")
             
             return client, sales_ss
             
-        except gspread.exceptions.APIError as e:
-            last_error = e
-            error_msg = str(e)
-            logger.error(f"❌ DEBUG: APIError on attempt {attempt + 1}: {error_msg[:200]}...")
-            
-            # Check for specific error types
-            if "404" in error_msg:
-                logger.error(f"❌ DEBUG: Spreadsheet NOT FOUND (404). Check that:")
-                logger.error(f"   - The Sheet ID is correct: {SALES_SPREADSHEET_ID}")
-                logger.error(f"   - The Service Account has access to the sheet")
-                logger.error(f"   - The sheet exists and is not deleted")
-            elif "403" in error_msg:
-                logger.error(f"❌ DEBUG: Permission DENIED (403). Check that:")
-                logger.error(f"   - The Service Account has EDITOR access to the sheet")
-                logger.error(f"   - Google Sheets API is enabled")
-            elif "429" in error_msg:
-                logger.error(f"⚠️ DEBUG: Rate limit (429) - will retry")
-            elif "503" in error_msg or "unavailable" in error_msg.lower():
-                logger.error(f"⚠️ DEBUG: Service unavailable (503) - will retry")
-            else:
-                logger.error(f"❌ DEBUG: Other API error: {error_msg[:200]}...")
-                
         except Exception as e:
             last_error = e
-            logger.error(f"❌ DEBUG: Exception on attempt {attempt + 1}: {type(e).__name__}: {e}")
+            error_msg = str(e)
             
-        # Check if we should retry
-        if attempt < max_retries - 1:
-            delay = initial_delay * (2 ** attempt)
-            logger.info(f"⏳ Retrying in {delay} seconds...")
-            time.sleep(delay)
-        else:
-            logger.error(f"❌ Failed to connect after {max_retries} attempts")
+            # Check if this is a 503 error or connection issue
+            is_503 = "503" in error_msg or "unavailable" in error_msg.lower()
+            is_connection = "connection" in error_msg.lower() or "timeout" in error_msg.lower()
+            
+            if is_503 or is_connection:
+                if attempt < max_retries - 1:
+                    delay = initial_delay * (2 ** attempt)  # Exponential backoff
+                    logger.warning(f"⚠️ Google Sheets {'503 (unavailable)' if is_503 else 'connection'} error (attempt {attempt + 1})")
+                    logger.info(f"⏳ Retrying in {delay} seconds...")
+                    time.sleep(delay)
+                    continue
+                else:
+                    logger.error(f"❌ Failed to connect after {max_retries} attempts")
+                    break
+            else:
+                # Non-retryable error
+                logger.error(f"❌ Non-retryable error: {e}")
+                break
     
     # If we get here, all retries failed
-    logger.error(f"❌ DEBUG: All retries exhausted. Last error: {last_error}")
     raise Exception(f"Failed to connect to Google Sheets after {max_retries} attempts. Last error: {last_error}")
 
 
 class SheetsService:
     def __init__(self):
-        logger.info("🔍 DEBUG: SheetsService.__init__() called")
-        
         # Use retry logic for connection
-        try:
-            logger.info("🔍 DEBUG: Calling _connect_with_retry()...")
-            client, sales_ss = _connect_with_retry()
-            logger.info("✅ DEBUG: Connection successful!")
-        except Exception as e:
-            logger.error(f"❌ DEBUG: Connection failed in __init__: {e}")
-            raise
+        client, sales_ss = _connect_with_retry()
         
         self._sales_ss = sales_ss
         self._client = client
@@ -336,15 +287,14 @@ class SheetsService:
         return ws
 
     def _create_worksheet(self, ss: gspread.Spreadsheet, name: str, department: str) -> gspread.Worksheet:
-        employees = SALES_EMPLOYEES
+        """Create a new worksheet with headers only (no pre-populated employee names)"""
         headers = SALES_HEADERS
-        ws = ss.add_worksheet(title=name, rows=str(len(employees) * 35 + 10), cols="20")
+        ws = ss.add_worksheet(title=name, rows="1000", cols="20")
         
         ws.update("A1", [headers])
-        ws.update(f"B2:B{len(employees) + 1}", [[emp] for emp in employees])
         self._apply_formatting(ws)
         
-        logger.info(f"Created sheet '{name}' for {department}")
+        logger.info(f"Created sheet '{name}' for {department} with headers only")
         return ws
 
     def mark_all_as_not_sent(self, department: str, date_str: str) -> None:
@@ -403,6 +353,7 @@ class SheetsService:
 
     @with_retry()
     def ensure_date_for_all_employees(self, department: str, date_str: str) -> None:
+        """Add date rows for employees who don't have a row with that date"""
         employees = SALES_EMPLOYEES
         ws = self._get_worksheet(department, date_str)
         
