@@ -29,28 +29,28 @@ jobs:
           cd "Working_Report_Editor " || echo "Cannot cd into folder"
           ls -la
 
-      - name: Debug - Check OAuth Secrets
+      - name: Debug - Check OAuth Secrets in Workflow
         run: |
-          echo "=== Checking OAuth Secrets ==="
-          if [ -n "$CLIENT_ID" ]; then
-            echo "✅ CLIENT_ID is set (length: ${#CLIENT_ID})"
+          echo "=== Checking OAuth Secrets in Workflow ==="
+          if [ -n "$THANENEW_CLIENT_ID" ]; then
+            echo "✅ THANENEW_CLIENT_ID is set (length: ${#THANENEW_CLIENT_ID})"
           else
-            echo "❌ CLIENT_ID is EMPTY"
+            echo "❌ THANENEW_CLIENT_ID is EMPTY"
           fi
-          if [ -n "$CLIENT_SECRET" ]; then
-            echo "✅ CLIENT_SECRET is set (length: ${#CLIENT_SECRET})"
+          if [ -n "$THANENEW_CLIENT_SECRET" ]; then
+            echo "✅ THANENEW_CLIENT_SECRET is set (length: ${#THANENEW_CLIENT_SECRET})"
           else
-            echo "❌ CLIENT_SECRET is EMPTY"
+            echo "❌ THANENEW_CLIENT_SECRET is EMPTY"
           fi
-          if [ -n "$REFRESH_TOKEN" ]; then
-            echo "✅ REFRESH_TOKEN is set (length: ${#REFRESH_TOKEN})"
+          if [ -n "$THANENEW_REFRESH_TOKEN" ]; then
+            echo "✅ THANENEW_REFRESH_TOKEN is set (length: ${#THANENEW_REFRESH_TOKEN})"
           else
-            echo "❌ REFRESH_TOKEN is EMPTY"
+            echo "❌ THANENEW_REFRESH_TOKEN is EMPTY"
           fi
         env:
-          CLIENT_ID: ${{ secrets.THANENEW_CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.THANENEW_CLIENT_SECRET }}
-          REFRESH_TOKEN: ${{ secrets.THANENEW_REFRESH_TOKEN }}
+          THANENEW_CLIENT_ID: ${{ secrets.THANENEW_CLIENT_ID }}
+          THANENEW_CLIENT_SECRET: ${{ secrets.THANENEW_CLIENT_SECRET }}
+          THANENEW_REFRESH_TOKEN: ${{ secrets.THANENEW_REFRESH_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -95,9 +95,9 @@ jobs:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY_THANENEW }}
           SALES_SPREADSHEET_ID: ${{ secrets.THANENEW_SALES_SPREADSHEET_ID }}
-          CLIENT_ID: ${{ secrets.THANENEW_CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.THANENEW_CLIENT_SECRET }}
-          REFRESH_TOKEN: ${{ secrets.THANENEW_REFRESH_TOKEN }}
+          THANENEW_CLIENT_ID: ${{ secrets.THANENEW_CLIENT_ID }}
+          THANENEW_CLIENT_SECRET: ${{ secrets.THANENEW_CLIENT_SECRET }}
+          THANENEW_REFRESH_TOKEN: ${{ secrets.THANENEW_REFRESH_TOKEN }}
 
       - name: Commit and push logs
         run: |
