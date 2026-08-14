@@ -8,7 +8,7 @@ UPDATED: Supports writing "Not Sent" status for late Sales submissions
 UPDATED: Added retry logic with exponential backoff for connection failures (503 errors)
 UPDATED: Added timeout to prevent hanging
 UPDATED: Removed HR references (Sales only branch)
-UPDATED: Removed pre-population of employee names without dates in new sheets
+UPDATED: Pre-populates employees with current date when creating new sheet
 """
 
 import logging
@@ -287,14 +287,23 @@ class SheetsService:
         return ws
 
     def _create_worksheet(self, ss: gspread.Spreadsheet, name: str, department: str) -> gspread.Worksheet:
-        """Create a new worksheet with headers only (no pre-populated employee names)"""
+        """Create a new worksheet with all employees pre-populated with current date"""
+        employees = SALES_EMPLOYEES
         headers = SALES_HEADERS
-        ws = ss.add_worksheet(title=name, rows="1000", cols="20")
+        date_str = datetime.now().strftime("%d-%m-%Y")
+        ws = ss.add_worksheet(title=name, rows=str(len(employees) * 35 + 10), cols="20")
         
         ws.update("A1", [headers])
+        
+        # Add employees WITH the current date
+        rows = []
+        for emp in employees:
+            rows.append([date_str, emp])
+        ws.update(f"A2:B{len(employees) + 1}", rows)
+        
         self._apply_formatting(ws)
         
-        logger.info(f"Created sheet '{name}' for {department} with headers only")
+        logger.info(f"Created sheet '{name}' for {department} with {len(employees)} employees")
         return ws
 
     def mark_all_as_not_sent(self, department: str, date_str: str) -> None:
