@@ -9,6 +9,8 @@ UPDATED: Added support for "Connect" without "ed" (e.g., Connect:- 74)
 UPDATED: Added support for "1hr" format (e.g., 1hr 14m 21s)
 UPDATED: Added support for "min" as minutes identifier (e.g., 1hr 25min 46s)
 UPDATED: Added support for "MINS" and "SEC" uppercase full words (e.g., 49 MINS 9 SEC)
+UPDATED: Added support for "hr" and "min" and "sec" full words (e.g., 1hr 9min 47sec)
+UPDATED: Added support for MM:SS format (e.g., 58:14)
 UPDATED: Added "Connect" with capital C to keywords list for better matching
 UPDATED: Improved call number extraction precision
 """
@@ -58,7 +60,7 @@ Rules:
 - Use 0 for missing integer fields.
 - Use "00:00:00" for missing duration.
 - If the email contains "Leave" or "leave" anywhere, mark as "Leave" and skip.
-- Duration can be in formats: "1h 0m 35s", "1H 15M + 14M", "1 H 31 M", "1hr 25m 21s", "01:28:52", "02.07.36", "2.08.32", "1h 42m 8sec", "1hr 14m 21s", "1hr 25min 46s", "49 MINS 9 SEC"
+- Duration can be in formats: "1h 0m 35s", "1H 15M + 14M", "1 H 31 M", "1hr 25m 21s", "01:28:52", "02.07.36", "2.08.32", "1h 42m 8sec", "1hr 14m 21s", "1hr 25min 46s", "49 MINS 9 SEC", "1hr 9min 47sec", "58:14"
 
 Email content:
 """
@@ -201,6 +203,12 @@ class GeminiParser:
                 if match:
                     return match.group(1)
 
+                # Handle MM:SS format (e.g., 58:14)
+                pattern_mm_ss = rf"(?i){kw_esc}[\s]*[:=-][\s]*(\d{{2}}:\d{{2}})"
+                match = re.search(pattern_mm_ss, text)
+                if match:
+                    return match.group(1).strip()
+
                 # Handle text format with "sec" (e.g., 1h 42m 8sec)
                 pattern_text_sec = rf"(?i){kw_esc}[\s]*[:=-][\s]*(\d+\s*h(?:r)?s?\s*\d+\s*m(?:in)?s?\s*\d+\s*sec)"
                 match = re.search(pattern_text_sec, text)
@@ -210,6 +218,12 @@ class GeminiParser:
                 # Handle text format with "hr" and "min" (e.g., 1hr 25min 46s)
                 pattern_text_hr_min = rf"(?i){kw_esc}[\s]*[:=-][\s]*(\d+\s*hr\s*\d+\s*min\s*\d+\s*s)"
                 match = re.search(pattern_text_hr_min, text)
+                if match:
+                    return match.group(1).strip()
+
+                # Handle "1hr 9min 47sec" format (full words with spaces)
+                pattern_hr_min_sec = rf"(?i){kw_esc}[\s]*[:=-][\s]*(\d+\s*hr\s*\d+\s*min\s*\d+\s*sec)"
+                match = re.search(pattern_hr_min_sec, text)
                 if match:
                     return match.group(1).strip()
 
@@ -321,6 +335,12 @@ class GeminiParser:
         if match:
             return match.group(0)
 
+        # Handle MM:SS format (e.g., 58:14)
+        match = re.search(r'(\d{2}):(\d{2})', text)
+        if match and text.count(':') == 1:
+            m, s = int(match.group(1)), int(match.group(2))
+            return f"00:{m:02d}:{s:02d}"
+
         # Handle HH.MM.SS with two-digit hour
         match = re.search(r'(\d{2})\.(\d{2})\.(\d{2})', text)
         if match:
@@ -340,6 +360,12 @@ class GeminiParser:
         if match:
             m, s = int(match.group(1)), int(match.group(2))
             return f"00:{m:02d}:{s:02d}"
+
+        # Handle "1hr 9min 47sec" format (full words with spaces)
+        match = re.search(r'(\d+)\s*hr\s*(\d+)\s*min\s*(\d+)\s*sec', text, re.IGNORECASE)
+        if match:
+            h, m, s = int(match.group(1)), int(match.group(2)), int(match.group(3))
+            return f"{h:02d}:{m:02d}:{s:02d}"
 
         # Handle "1hr 25min 46s" format
         match = re.search(r'(\d+)\s*hr\s*(\d+)\s*min\s*(\d+)\s*s', text, re.IGNORECASE)
