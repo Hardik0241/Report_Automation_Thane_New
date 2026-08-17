@@ -8,6 +8,7 @@ UPDATED: Added support for "sec" as seconds identifier (e.g., 8sec, 42m 8sec)
 UPDATED: Added support for single-digit hour with dots (H.MM.SS) - e.g., 2.08.32
 UPDATED: Added support for "min" as minutes identifier (e.g., 1hr 25min 46s)
 UPDATED: Added support for "MINS" and "SEC" uppercase full words (e.g., 49 MINS 9 SEC)
+UPDATED: Added support for "hr" and "min" and "sec" full words (e.g., 1hr 9min 47sec)
 UPDATED: Fixed duration parsing for addition patterns like "+7 minutes", "+10 min", "also add 10 min"
 """
 
@@ -85,6 +86,8 @@ def parse_duration(raw: str) -> str:
     - "1h 42m 8sec" → 01:42:08 (sec as seconds)
     - "1hr 25min 46s" → 01:25:46 (min as minutes)
     - "49 MINS 9 SEC" → 00:49:09 (uppercase full words)
+    - "1hr 9min 47sec" → 01:09:47 (full words with spaces)
+    - "58:14" → 00:58:14 (MM:SS format)
     - "1H 1M + 20 M, Also add 10 min" → 01:31:00
     """
     if not raw:
@@ -130,11 +133,17 @@ def parse_duration(raw: str) -> str:
         s = int(match.group(3))
         return f"{h:02d}:{m:02d}:{s:02d}"
     
-    # Handle MM:SS format
+    # Handle MM:SS format (e.g., 58:14)
     match = re.search(r'(\d{2}):(\d{2})', raw)
     if match and ':' in raw and raw.count(':') == 1:
         m, s = int(match.group(1)), int(match.group(2))
         return f"00:{m:02d}:{s:02d}"
+    
+    # Handle "1hr 9min 47sec" format (full words with spaces)
+    match = re.search(r'(\d+)\s*hr\s*(\d+)\s*min\s*(\d+)\s*sec', raw, re.IGNORECASE)
+    if match:
+        h, m, s = int(match.group(1)), int(match.group(2)), int(match.group(3))
+        return f"{h:02d}:{m:02d}:{s:02d}"
     
     # Handle multiple durations with "+" and text additions
     if '+' in raw or re.search(r'(also add|add|plus|additional)', raw, re.IGNORECASE):
@@ -157,6 +166,13 @@ def _duration_to_seconds(duration_str: str) -> int:
     
     # Remove any text in parentheses or after keywords
     duration_str = re.sub(r'\s+(?:on|from|another|whatsapp|other|phone|personal|prsnl).*$', '', duration_str, flags=re.IGNORECASE)
+    
+    # Handle "1hr 9min 47sec" format (full words with spaces)
+    match = re.search(r'(\d+)\s*hr\s*(\d+)\s*min\s*(\d+)\s*sec', duration_str, re.IGNORECASE)
+    if match:
+        h, m, s = int(match.group(1)), int(match.group(2)), int(match.group(3))
+        total_seconds += h * 3600 + m * 60 + s
+        return total_seconds
     
     # Handle addition patterns with + symbol
     addition_match = re.search(r'\+\s*(\d+)\s*(?:min(?:ute)?s?)', duration_str, re.IGNORECASE)
@@ -209,7 +225,7 @@ def _duration_to_seconds(duration_str: str) -> int:
         total_seconds += h * 3600 + m * 60 + s
         return total_seconds
     
-    # NEW: Handle "49 MINS 9 SEC" format (uppercase full words)
+    # Handle "49 MINS 9 SEC" format (uppercase full words)
     # Pattern for "X MINS Y SEC"
     match = re.search(r'(\d+)\s*MINS?\s*(\d+)\s*SEC', duration_str, re.IGNORECASE)
     if match:
@@ -237,7 +253,7 @@ def _duration_to_seconds(duration_str: str) -> int:
         total_seconds += h * 3600 + m * 60 + s
         return total_seconds
     
-    # NEW: Handle duration with "min" as minutes identifier (e.g., 1hr 25min 46s)
+    # Handle duration with "min" as minutes identifier (e.g., 1hr 25min 46s)
     # Pattern for "Xhr Ymin Zs"
     match = re.search(r'(\d+)\s*hr\s*(\d+)\s*min\s*(\d+)\s*s', duration_str, re.IGNORECASE)
     if match:
