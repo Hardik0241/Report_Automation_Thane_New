@@ -22,7 +22,7 @@ if creds_json:
 # ⚠️ UPDATE THIS LIST WITH BRANCH-SPECIFIC EMPLOYEES
 # ============================================================
 SALES_EMPLOYEES = [
-    "Adit", "Antima", "Aryan", "Chetan", "Chris",
+    "Adit", "Aryan", "Chetan", "Chris",
     "Karan", "Khushi", "Kitiksha", "Mamta", "Rakshan",
     "Sameer", "Tushar", "Yukta", "Vaishnavi", "Zoya", "Vishnu",
 ]
@@ -33,7 +33,6 @@ SALES_EMPLOYEES = [
 # ============================================================
 SALES_EMAIL_MAP = {
     "adit.edujam@gmail.com": "Adit",
-    "antima.edujam@gmail.com": "Antima",
     "aryany.edujam@gmail.com": "Aryan",
     "chetang.edujam@gmail.com": "Chetan",
     "chrisa.edujam@gmail.com": "Chris",
