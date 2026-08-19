@@ -19,7 +19,6 @@ if creds_json:
 
 # ============================================================
 # EMPLOYEE LISTS - SALES ONLY
-# ⚠️ UPDATE THIS LIST WITH BRANCH-SPECIFIC EMPLOYEES
 # ============================================================
 SALES_EMPLOYEES = [
     "Adit", "Aryan", "Chetan", "Chris",
@@ -29,7 +28,6 @@ SALES_EMPLOYEES = [
 
 # ============================================================
 # EMAIL TO NAME MAPPING - SALES ONLY
-# ⚠️ UPDATE THIS MAP WITH BRANCH-SPECIFIC EMAILS
 # ============================================================
 SALES_EMAIL_MAP = {
     "adit.edujam@gmail.com": "Adit",
@@ -121,7 +119,7 @@ VALIDATION_RULES = {
 }
 
 DEPARTMENT_KEYWORDS = {
-    "Sales": ["sales", "callyzer", "dialer", "prospect", "dialed", "dial", "outgoing"]
+    "Sales": ["sales", "callyzer", "dialer", "prospect", "dialed", "dial", "outgoing", "dails", "prospects"]
 }
 
 DATE_PATTERNS = [
