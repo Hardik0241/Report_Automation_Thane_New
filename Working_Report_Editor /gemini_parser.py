@@ -5,6 +5,7 @@ UPDATED: Removed all HR-related code
 UPDATED: Fixed duration extraction for HH:MM:SS format with dash and dots
 UPDATED: Added support for "sec" as seconds identifier (e.g., 8sec, 42m 8sec)
 UPDATED: Added support for "total dialled" (double L) spelling variation
+UPDATED: Added support for "total dails" (typo variation)
 UPDATED: Added support for "Connect" without "ed" (e.g., Connect:- 74)
 UPDATED: Added support for "1hr" format (e.g., 1hr 14m 21s)
 UPDATED: Added support for "min" as minutes identifier (e.g., 1hr 25min 46s)
@@ -12,6 +13,7 @@ UPDATED: Added support for "MINS" and "SEC" uppercase full words (e.g., 49 MINS 
 UPDATED: Added support for "hr" and "min" and "sec" full words (e.g., 1hr 9min 47sec)
 UPDATED: Added support for MM:SS format (e.g., 58:14)
 UPDATED: Added "Connect" with capital C to keywords list for better matching
+UPDATED: Added "Prospects" and "dails" to department detection keywords
 UPDATED: Improved call number extraction precision
 """
 
@@ -40,7 +42,7 @@ Return ONLY a JSON object — no markdown, no explanation.
 IMPORTANT: This is a SALES report only.
 
 For a SALES report, look for:
-- "total dialed", "total dial", "total dialled", "dials", "total calls", "calls made", "dial"
+- "total dialed", "total dial", "total dialled", "total dails", "dials", "total calls", "calls made", "dial"
 - "connected", "conn", "total connected", "connected calls", "connect"  
 - "duration", "dur", "talk time", "time"
 - "prospect", "prospects", "pros"
@@ -252,8 +254,9 @@ class GeminiParser:
             return "00:00:00"
 
         # Sales only - no HR
+        # UPDATED: Added "total dails" to handle typos
         total_dialed = grab_number([
-            "total dial", "total dials", "total dialed", "total dialled",
+            "total dial", "total dials", "total dialed", "total dialled", "total dails",
             "total calls", "calls made", "dials", "dial"
         ])
 
