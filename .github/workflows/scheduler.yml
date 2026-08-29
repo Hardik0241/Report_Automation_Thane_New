@@ -15,7 +15,7 @@ on:
     - cron: '30 15 * * 1-6'
 
   workflow_dispatch:
-    # Allow manual trigger with date input
+    # Allow manual trigger with optional date input
     inputs:
       force_date:
         description: 'Enter date (dd-mm-yyyy) to process emails from that specific date. Leave empty for today.'
@@ -82,5 +82,5 @@ jobs:
           THANENEW_CLIENT_ID: ${{ secrets.THANENEW_CLIENT_ID }}
           THANENEW_CLIENT_SECRET: ${{ secrets.THANENEW_CLIENT_SECRET }}
           THANENEW_REFRESH_TOKEN: ${{ secrets.THANENEW_REFRESH_TOKEN }}
-          # Pass the manual input (if set) as FORCE_DATE
+          # Pass the manual input (if set) as FORCE_DATE (optional)
           FORCE_DATE: ${{ github.event.inputs.force_date }}
