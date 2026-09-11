@@ -42,9 +42,20 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
+      - name: Disable third-party apt repositories
+        run: |
+          # Disable Google Chrome repo (prevents hash mismatch failures)
+          sudo mv /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.list.disabled 2>/dev/null || true
+          sudo mv /etc/apt/sources.list.d/google.list /etc/apt/sources.list.d/google.list.disabled 2>/dev/null || true
+          # Disable Microsoft repo (another common source of transient failures)
+          sudo mv /etc/apt/sources.list.d/microsoft-prod.list /etc/apt/sources.list.d/microsoft-prod.list.disabled 2>/dev/null || true
+          echo "✅ Third-party apt repositories disabled"
+
       - name: Install system dependencies
         run: |
-          sudo apt-get update
+          for i in 1 2 3; do
+            sudo apt-get update && break || sleep 15
+          done
           sudo apt-get install -y tesseract-ocr
 
       - name: Install dependencies
