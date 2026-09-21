@@ -23,7 +23,7 @@ if creds_json:
 SALES_EMPLOYEES = [
     "Adit", "Aryan", "Chetan", "Chris",
     "Karan", "Khushi", "Kitiksha", "Mamta", "Rakshan",
-    "Sameer", "Yukta", "Vaishnavi", "Zoya",
+    "Sameer", "Yukta", "Vaishnavi", "Zoya", "Rushil",
 ]
 
 # ============================================================
@@ -43,6 +43,7 @@ SALES_EMAIL_MAP = {
     "yuktam.edujam@gmail.com": "Yukta",
     "vaishnavip.edujam@gmail.com": "Vaishnavi",
     "zoya.edujam@gmail.com": "Zoya",
+    "rushil.edujam@gmail.com": "Rushil",
 }
 
 # ============================================================
